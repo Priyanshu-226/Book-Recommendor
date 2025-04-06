@@ -1,0 +1,159 @@
+import React, { useState } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
+
+const genres = ["Fantasy", "Mystery/Thriller", "Romance", "Sci-Fi", "Drama", "Comedy", "Non-fiction"];
+const tones = ["Fast-paced", "Slow-burn", "World-building", "Character-focused", "Twisty"];
+const moods = ["Emotionally intense", "Thought-provoking", "Uplifting", "Page-turning", "Heartwarming"];
+
+export default function BookRecommenderForm() {
+  const [formData, setFormData] = useState({
+    genres: [],
+    favoriteBooks: "",
+    tones: [],
+    mood: [],
+    format: ""
+  });
+
+  const [recommendations, setRecommendations] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  const handleCheckboxChange = (category, value) => {
+    setFormData((prev) => {
+      const updated = prev[category].includes(value)
+        ? prev[category].filter((v) => v !== value)
+        : [...prev[category], value];
+      return { ...prev, [category]: updated };
+    });
+  };
+
+  const handleSubmit = async () => {
+    setLoading(true);
+    setRecommendations([]);
+    const response = await fetch("/api/recommend", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(formData),
+    });
+    const result = await response.json();
+    setRecommendations(result.recommendations);
+    setLoading(false);
+  };
+
+  return (
+    <Card className="max-w-xl mx-auto p-6">
+      <CardContent className="space-y-4">
+        <h2 className="text-xl font-semibold">📚 Book Recommender</h2>
+
+        <Label>1. What genres are you into?</Label>
+        <div className="flex flex-wrap gap-2">
+          {genres.map((g) => (
+            <label key={g} className="flex items-center space-x-2">
+              <Checkbox
+                checked={formData.genres.includes(g)}
+                onCheckedChange={() => handleCheckboxChange("genres", g)}
+              />
+              <span>{g}</span>
+            </label>
+          ))}
+        </div>
+
+        <Separator />
+
+        <Label>2. Favorite books or authors?</Label>
+        <Textarea
+          value={formData.favoriteBooks}
+          onChange={(e) => setFormData({ ...formData, favoriteBooks: e.target.value })}
+          placeholder="E.g. Harry Potter, The Hobbit, Colleen Hoover..."
+        />
+
+        <Separator />
+
+        <Label>3. What kind of tone do you prefer?</Label>
+        <div className="flex flex-wrap gap-2">
+          {tones.map((t) => (
+            <label key={t} className="flex items-center space-x-2">
+              <Checkbox
+                checked={formData.tones.includes(t)}
+                onCheckedChange={() => handleCheckboxChange("tones", t)}
+              />
+              <span>{t}</span>
+            </label>
+          ))}
+        </div>
+
+        <Separator />
+
+        <Label>4. Current mood or vibe?</Label>
+        <div className="flex flex-wrap gap-2">
+          {moods.map((m) => (
+            <label key={m} className="flex items-center space-x-2">
+              <Checkbox
+                checked={formData.mood.includes(m)}
+                onCheckedChange={() => handleCheckboxChange("mood", m)}
+              />
+              <span>{m}</span>
+            </label>
+          ))}
+        </div>
+
+        <Separator />
+
+        <Label>5. Do you prefer standalone books or series?</Label>
+        <select
+          value={formData.format}
+          onChange={(e) => setFormData({ ...formData, format: e.target.value })}
+          className="w-full p-2 border rounded"
+        >
+          <option value="">Select an option</option>
+          <option value="Standalone">Standalone</option>
+          <option value="Series">Series</option>
+          <option value="No preference">No preference</option>
+        </select>
+
+        <Button className="mt-4 w-full" onClick={handleSubmit} disabled={loading}>
+          {loading ? "🔄 Finding books..." : "🔍 Get Recommendations"}
+        </Button>
+
+        {loading && (
+          <div className="space-y-2 mt-6">
+            <Skeleton className="w-full h-6 rounded" />
+            <Skeleton className="w-5/6 h-6 rounded" />
+            <Skeleton className="w-3/4 h-6 rounded" />
+          </div>
+        )}
+
+        {recommendations.length > 0 && (
+          <div className="mt-6">
+            <h3 className="text-lg font-semibold">📖 Recommended Books:</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+              {recommendations.map((book, index) => (
+                <div key={index} className="flex items-center space-x-4">
+                  <img
+                    src={`https://covers.openlibrary.org/b/isbn/${book.isbn}-M.jpg`}
+                    alt={book.title}
+                    className="w-16 h-24 object-cover rounded shadow"
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = "https://via.placeholder.com/100x150?text=No+Cover";
+                    }}
+                  />
+                  <div>
+                    <p className="font-medium">{book.title}</p>
+                    <p className="text-sm text-gray-500">{book.author}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
