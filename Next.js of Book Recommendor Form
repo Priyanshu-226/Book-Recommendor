@@ -1,23 +1,57 @@
 import React, { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 
-const genres = ["Fantasy", "Mystery/Thriller", "Romance", "Sci-Fi", "Drama", "Comedy", "Non-fiction"];
-const tones = ["Fast-paced", "Slow-burn", "World-building", "Character-focused", "Twisty"];
-const moods = ["Emotionally intense", "Thought-provoking", "Uplifting", "Page-turning", "Heartwarming"];
+const storyTypes = [
+  "Thrilling mysteries",
+  "Heartwarming romances",
+  "Epic adventures",
+  "Thought-provoking dramas",
+  "Inspiring true stories"
+];
+
+const readingMoods = [
+  "Light and fun",
+  "Emotional and deep",
+  "Dark and intense",
+  "Inspiring and uplifting",
+  "Something else"
+];
+
+const pacingPreferences = [
+  "Fast-paced",
+  "Slow and immersive",
+  "A mix of both"
+];
+
+const settings = [
+  "Realistic modern-day",
+  "Historical past",
+  "Futuristic or sci-fi worlds",
+  "Magical or fantastical lands"
+];
+
+const themes = [
+  "Love & relationships",
+  "Self-growth & mental health",
+  "Adventure & survival",
+  "Crime & mystery",
+  "Science & technology",
+  "Philosophy & life questions"
+];
 
 export default function BookRecommenderForm() {
   const [formData, setFormData] = useState({
-    genres: [],
-    favoriteBooks: "",
-    tones: [],
-    mood: [],
+    storyTypes: [],
+    readingMoods: [],
+    pacing: [],
+    settings: [],
+    themes: [],
     format: ""
   });
 
@@ -51,52 +85,28 @@ export default function BookRecommenderForm() {
       <CardContent className="space-y-4">
         <h2 className="text-xl font-semibold">📚 Book Recommender</h2>
 
-        <Label>1. What genres are you into?</Label>
+        <Label>1. What kind of stories do you enjoy most?</Label>
         <div className="flex flex-wrap gap-2">
-          {genres.map((g) => (
-            <label key={g} className="flex items-center space-x-2">
+          {storyTypes.map((s) => (
+            <label key={s} className="flex items-center space-x-2">
               <Checkbox
-                checked={formData.genres.includes(g)}
-                onCheckedChange={() => handleCheckboxChange("genres", g)}
+                checked={formData.storyTypes.includes(s)}
+                onCheckedChange={() => handleCheckboxChange("storyTypes", s)}
               />
-              <span>{g}</span>
+              <span>{s}</span>
             </label>
           ))}
         </div>
 
         <Separator />
 
-        <Label>2. Favorite books or authors?</Label>
-        <Textarea
-          value={formData.favoriteBooks}
-          onChange={(e) => setFormData({ ...formData, favoriteBooks: e.target.value })}
-          placeholder="E.g. Harry Potter, The Hobbit, Colleen Hoover..."
-        />
-
-        <Separator />
-
-        <Label>3. What kind of tone do you prefer?</Label>
+        <Label>2. Which of these best matches your current reading mood?</Label>
         <div className="flex flex-wrap gap-2">
-          {tones.map((t) => (
-            <label key={t} className="flex items-center space-x-2">
-              <Checkbox
-                checked={formData.tones.includes(t)}
-                onCheckedChange={() => handleCheckboxChange("tones", t)}
-              />
-              <span>{t}</span>
-            </label>
-          ))}
-        </div>
-
-        <Separator />
-
-        <Label>4. Current mood or vibe?</Label>
-        <div className="flex flex-wrap gap-2">
-          {moods.map((m) => (
+          {readingMoods.map((m) => (
             <label key={m} className="flex items-center space-x-2">
               <Checkbox
-                checked={formData.mood.includes(m)}
-                onCheckedChange={() => handleCheckboxChange("mood", m)}
+                checked={formData.readingMoods.includes(m)}
+                onCheckedChange={() => handleCheckboxChange("readingMoods", m)}
               />
               <span>{m}</span>
             </label>
@@ -105,16 +115,61 @@ export default function BookRecommenderForm() {
 
         <Separator />
 
-        <Label>5. Do you prefer standalone books or series?</Label>
+        <Label>3. Do you prefer fast-paced, action-packed plots or slower, more character-focused stories?</Label>
+        <div className="flex flex-wrap gap-2">
+          {pacingPreferences.map((p) => (
+            <label key={p} className="flex items-center space-x-2">
+              <Checkbox
+                checked={formData.pacing.includes(p)}
+                onCheckedChange={() => handleCheckboxChange("pacing", p)}
+              />
+              <span>{p}</span>
+            </label>
+          ))}
+        </div>
+
+        <Separator />
+
+        <Label>4. What kind of settings do you enjoy most?</Label>
+        <div className="flex flex-wrap gap-2">
+          {settings.map((s) => (
+            <label key={s} className="flex items-center space-x-2">
+              <Checkbox
+                checked={formData.settings.includes(s)}
+                onCheckedChange={() => handleCheckboxChange("settings", s)}
+              />
+              <span>{s}</span>
+            </label>
+          ))}
+        </div>
+
+        <Separator />
+
+        <Label>5. Which themes or topics interest you the most?</Label>
+        <div className="flex flex-wrap gap-2">
+          {themes.map((t) => (
+            <label key={t} className="flex items-center space-x-2">
+              <Checkbox
+                checked={formData.themes.includes(t)}
+                onCheckedChange={() => handleCheckboxChange("themes", t)}
+              />
+              <span>{t}</span>
+            </label>
+          ))}
+        </div>
+
+        <Separator />
+
+        <Label>6. Do you like sticking to your favorite genres, or are you open to trying something new?</Label>
         <select
           value={formData.format}
           onChange={(e) => setFormData({ ...formData, format: e.target.value })}
           className="w-full p-2 border rounded"
         >
           <option value="">Select an option</option>
-          <option value="Standalone">Standalone</option>
-          <option value="Series">Series</option>
-          <option value="No preference">No preference</option>
+          <option value="Stick to favorites">Stick to favorites</option>
+          <option value="Mix of both">Mix of both</option>
+          <option value="Surprise me!">Surprise me!</option>
         </select>
 
         <Button className="mt-4 w-full" onClick={handleSubmit} disabled={loading}>
