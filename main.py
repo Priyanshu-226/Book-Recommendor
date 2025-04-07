@@ -1,30 +1,32 @@
-from flask import Flask, request, jsonify
-from book_recommender import get_recommendations
-from dotenv import load_dotenv
 import os
+import asyncio
+from dotenv import load_dotenv
+from groq_llama import ask_llama
 
-# Load API keys from .env
+# Load API key
 load_dotenv()
 
-app = Flask(__name__)
+def get_user_input():
+    query = input("📚 Enter a book name: ")
+    profile = input("👤 Optional: Describe your reading preferences (or leave blank): ")
+    return query, profile
 
-@app.route("/")
-def home():
-    return "✅ Book Recommender API is running!"
-
-@app.route("/recommend", methods=["GET"])
-def recommend():
-    query = request.args.get("query")
-    profile = request.args.get("profile", "")
+async def main():
+    query, profile = get_user_input()
 
     if not query:
-        return jsonify({"error": "Query parameter is required"}), 400
+        print("⚠️  Book query is required.")
+        return
+
+    prompt = f"Suggest 5 similar books to '{query}' based on the user's preferences: {profile}"
+    print("\n⏳ Fetching recommendations...\n")
 
     try:
-        recommendations = get_recommendations(query, profile)
-        return jsonify({"recommendations": recommendations})
+        response = await ask_llama(prompt)
+        print("✅ Book Recommendations:\n")
+        print(response)
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        print(f"❌ Error: {e}")
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    asyncio.run(main())
